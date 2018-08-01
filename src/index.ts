@@ -302,8 +302,8 @@ function activateCellVim(app: JupyterFrontEnd, tracker: INotebookTracker): Promi
             },
             isEnabled
         });
-        commands.addCommand('leave-insert-mode', {
-            label: 'Leave Insert Mode',
+        commands.addCommand('leave-current-mode', {
+            label: 'Leave current mode, moving from insert/visual to normal to command.',
             execute: args => {
                 const current = getCurrent(args);
 
@@ -311,7 +311,15 @@ function activateCellVim(app: JupyterFrontEnd, tracker: INotebookTracker): Promi
                     const { content } = current;
                     if (content.activeCell !== null) {
                         let editor = content.activeCell.editor as CodeMirrorEditor;
-                        (CodeMirror as any).Vim.handleKey(editor.editor, '<Esc>');
+
+                        // Get the current editor state
+                        if(editor.editor.state.vim.insertMode) {
+                          (CodeMirror as any).Vim.handleKey(editor.editor, '<Esc>');
+                        } else if (editor.editor.state.vim.visualMode){
+                          (CodeMirror as any).Vim.handleKey(editor.editor, '<Esc>');
+                        } else {
+                          commands.execute('notebook:enter-command-mode');
+                        }
                     }
                 }
             },
@@ -474,7 +482,7 @@ function activateCellVim(app: JupyterFrontEnd, tracker: INotebookTracker): Promi
         commands.addKeyBinding({
             selector: '.jp-Notebook.jp-mod-editMode',
             keys: ['Escape'],
-            command: 'leave-insert-mode'
+            command: 'leave-current-mode'
         });
         commands.addKeyBinding({
             selector: '.jp-Notebook:focus',
