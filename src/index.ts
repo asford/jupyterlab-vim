@@ -1,4 +1,5 @@
 import * as CodeMirror from 'codemirror';
+import "codemirror/keymap/vim.js"
 
 import {
     JupyterFrontEnd, JupyterFrontEndPlugin
